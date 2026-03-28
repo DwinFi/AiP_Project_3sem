@@ -90,7 +90,14 @@ export default {
           password: this.password
         }
 
-        console.log(user)
+        this.$store.dispatch('registerUser', user)
+
+        this.email = ''
+        this.password = ''
+        this.confirmPassword = ''
+        this.$refs.form.resetValidation()
+
+        console.log(this.$store.getters.user)
       }
     }
   }
