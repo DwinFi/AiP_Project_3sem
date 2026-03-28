@@ -16,7 +16,8 @@ const routes = [
   {
     path: '/ad/:id',
     name: 'ad',
-    component: AdView
+    component: AdView,
+    props: true
   },
   {
     path: '/list',

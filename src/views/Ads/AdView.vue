@@ -2,21 +2,16 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <v-card class="mt-5">
+        <v-card class="mt-5" v-if="ad">
           <v-img
             height="400"
-            src="https://img.classistatic.de/api/v1/mo-prod/images/33/33f8b432-aeb9-48f5-83d0-519e6a2213f2?rule=mo-1600"
+            :src="ad.src"
             cover
           ></v-img>
 
           <v-card-text>
-            <h1 class="text-h4 mb-3">Indian Chief Vintage ABS Remus</h1>
-            <p>
-              Премиальный круизер с мощным двигателем, комфортной посадкой и выразительным
-              классическим дизайном. Этот мотоцикл отлично подходит как для городских поездок,
-              так и для дальних путешествий. Модель сочетает в себе стиль, мощность и высокий
-              уровень комфорта для владельца.
-            </p>
+            <h1 class="text-h4 mb-3">{{ ad.title }}</h1>
+            <p>{{ ad.desc }}</p>
           </v-card-text>
 
           <v-card-actions>
@@ -29,6 +24,10 @@
             </v-btn>
           </v-card-actions>
         </v-card>
+
+        <v-alert v-else type="error" class="mt-5">
+          Motorcycle not found
+        </v-alert>
       </v-col>
     </v-row>
   </v-container>
@@ -36,8 +35,11 @@
 
 <script>
 export default {
-  data() {
-    return {}
+  props: ['id'],
+  computed: {
+    ad() {
+      return this.$store.getters.adById(this.id)
+    }
   }
 }
 </script>
