@@ -11,12 +11,20 @@ export default {
 
   actions: {
     registerUser({ commit }, payload) {
-      const user = {
-        id: Math.random().toString(),
-        email: payload.email
-      }
+      commit('setLoading', true)
 
-      commit('setUser', user)
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const user = {
+            id: Math.random().toString(),
+            email: payload.email
+          }
+
+          commit('setUser', user)
+          commit('setLoading', false)
+          resolve(user)
+        }, 1000)
+      })
     }
   },
 

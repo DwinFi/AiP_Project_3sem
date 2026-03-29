@@ -43,7 +43,8 @@
             <v-btn
               color="primary"
               @click="onSubmit"
-              :disabled="!valid"
+              :disabled="!valid || loading"
+              :loading="loading"
             >
               Create Account
             </v-btn>
@@ -73,6 +74,9 @@ export default {
     }
   },
   computed: {
+    loading() {
+      return this.$store.getters.loading
+    },
     confirmPasswordRules() {
       return [
         v => !!v || 'Confirm password is required',
@@ -90,14 +94,14 @@ export default {
           password: this.password
         }
 
-        this.$store.dispatch('registerUser', user)
+        await this.$store.dispatch('registerUser', user)
 
         this.email = ''
         this.password = ''
         this.confirmPassword = ''
         this.$refs.form.resetValidation()
 
-        console.log(this.$store.getters.user)
+        this.$router.push('/')
       }
     }
   }
