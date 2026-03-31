@@ -34,12 +34,22 @@
             <v-btn
               color="primary"
               @click="onSubmit"
-              :disabled="!valid"
+              :disabled="!valid || loading"
+              :loading="loading"
             >
               Login
             </v-btn>
           </v-card-actions>
         </v-card>
+
+        <v-snackbar
+          :model-value="!!error"
+          color="error"
+          timeout="3000"
+          @update:modelValue="closeError"
+        >
+          {{ error }}
+        </v-snackbar>
       </v-col>
     </v-row>
   </v-container>
@@ -62,6 +72,14 @@ export default {
       ]
     }
   },
+  computed: {
+    loading() {
+      return this.$store.getters.loading
+    },
+    error() {
+      return this.$store.getters.error
+    }
+  },
   methods: {
     async onSubmit() {
       const result = await this.$refs.form.validate()
@@ -72,7 +90,22 @@ export default {
           password: this.password
         }
 
-        console.log(user)
+        try {
+          await this.$store.dispatch('loginUser', user)
+
+          this.email = ''
+          this.password = ''
+          this.$refs.form.resetValidation()
+
+          this.$router.push('/')
+        } catch (e) {
+          // Ошибка уже положена в store, snackbar покажется сам
+        }
+      }
+    },
+    closeError(value) {
+      if (!value) {
+        this.$store.dispatch('clearError')
       }
     }
   }
