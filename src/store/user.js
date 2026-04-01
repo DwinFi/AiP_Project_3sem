@@ -6,6 +6,9 @@ export default {
   mutations: {
     setUser(state, payload) {
       state.user = payload
+    },
+    logout(state) {
+      state.user = null
     }
   },
 
@@ -50,12 +53,19 @@ export default {
           }
         }, 1000)
       })
+    },
+
+    logoutUser({ commit }) {
+      commit('logout')
     }
   },
 
   getters: {
     user(state) {
       return state.user
+    },
+    isUserLoggedIn(state) {
+      return state.user !== null
     }
   }
 }

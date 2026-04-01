@@ -34,7 +34,7 @@
         <v-row>
           <v-col cols="12">
             <img
-              src="https://img.classistatic.de/api/v1/mo-prod/images/bc/bcbf1d30-bd6e-425c-9d07-c6c6eafe07f3?rule=mo-1600"
+              src="https://cdn.vuetifyjs.com/images/cards/cooking.png"
               height="150"
               class="mt-3"
               alt="preview"
@@ -56,7 +56,8 @@
             <v-btn
               color="success"
               @click="createAd"
-              :disabled="!valid"
+              :disabled="!valid || loading"
+              :loading="loading"
             >
               Create Motorcycle
             </v-btn>
@@ -77,6 +78,11 @@ export default {
       promo: true
     }
   },
+  computed: {
+    loading() {
+      return this.$store.getters.loading
+    }
+  },
   methods: {
     async createAd() {
       const result = await this.$refs.form.validate()
@@ -89,7 +95,7 @@ export default {
           src: 'https://cdn.vuetifyjs.com/images/cards/cooking.png'
         }
 
-        this.$store.dispatch('createAd', ad)
+        await this.$store.dispatch('createAd', ad)
 
         this.title = ''
         this.description = ''

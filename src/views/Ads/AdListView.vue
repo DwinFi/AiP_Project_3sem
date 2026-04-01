@@ -4,6 +4,14 @@
       <v-col cols="12" sm="10" lg="8">
         <h1 class="text-h5 mb-4 mt-4">My Motorcycles</h1>
 
+        <v-alert
+          v-if="myAds.length === 0"
+          type="info"
+          class="mb-4"
+        >
+          You have no motorcycles yet.
+        </v-alert>
+
         <v-card
           v-for="moto in myAds"
           :key="moto.id"

@@ -15,6 +15,13 @@
       <v-divider></v-divider>
 
       <v-list density="compact">
+        <v-list-item to="/" link>
+          <template #prepend>
+            <v-icon icon="mdi-home"></v-icon>
+          </template>
+          <v-list-item-title>Home</v-list-item-title>
+        </v-list-item>
+
         <v-list-item
           v-for="link in links"
           :key="link.title"
@@ -24,8 +31,18 @@
           <template #prepend>
             <v-icon :icon="link.icon"></v-icon>
           </template>
-
           <v-list-item-title>{{ link.title }}</v-list-item-title>
+        </v-list-item>
+
+        <v-list-item
+          v-if="isUserLoggedIn"
+          @click="onLogout"
+          link
+        >
+          <template #prepend>
+            <v-icon icon="mdi-logout"></v-icon>
+          </template>
+          <v-list-item-title>Logout</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -51,6 +68,15 @@
           <v-icon start :icon="link.icon"></v-icon>
           {{ link.title }}
         </v-btn>
+
+        <v-btn
+          v-if="isUserLoggedIn"
+          variant="text"
+          @click="onLogout"
+        >
+          <v-icon start icon="mdi-logout"></v-icon>
+          Logout
+        </v-btn>
       </v-toolbar-items>
     </v-app-bar>
 
@@ -64,14 +90,32 @@
 export default {
   data() {
     return {
-      drawer: false,
-      links: [
+      drawer: false
+    }
+  },
+  computed: {
+    isUserLoggedIn() {
+      return this.$store.getters.isUserLoggedIn
+    },
+    links() {
+      if (this.isUserLoggedIn) {
+        return [
+          { title: 'Orders', icon: 'mdi-bookmark-multiple-outline', url: '/orders' },
+          { title: 'Add Motorcycle', icon: 'mdi-motorbike', url: '/new' },
+          { title: 'My Motorcycles', icon: 'mdi-format-list-bulleted', url: '/list' }
+        ]
+      }
+
+      return [
         { title: 'Login', icon: 'mdi-lock', url: '/login' },
-        { title: 'Registration', icon: 'mdi-account-plus', url: '/registration' },
-        { title: 'Orders', icon: 'mdi-bookmark-multiple-outline', url: '/orders' },
-        { title: 'Add Motorcycle', icon: 'mdi-motorbike', url: '/new' },
-        { title: 'My Motorcycles', icon: 'mdi-format-list-bulleted', url: '/list' }
+        { title: 'Registration', icon: 'mdi-account-plus', url: '/registration' }
       ]
+    }
+  },
+  methods: {
+    onLogout() {
+      this.$store.dispatch('logoutUser')
+      this.$router.push('/login')
     }
   }
 }

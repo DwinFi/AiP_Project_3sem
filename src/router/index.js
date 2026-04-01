@@ -6,6 +6,7 @@ import NewAdView from '../views/Ads/NewAdView.vue'
 import LoginView from '../views/Auth/LoginView.vue'
 import RegistrationView from '../views/Auth/RegistrationView.vue'
 import OrdersView from '../views/User/OrdersView.vue'
+import store from '../store'
 
 const routes = [
   {
@@ -22,12 +23,14 @@ const routes = [
   {
     path: '/list',
     name: 'list',
-    component: AdListView
+    component: AdListView,
+    meta: { requiresAuth: true }
   },
   {
     path: '/new',
     name: 'newAd',
-    component: NewAdView
+    component: NewAdView,
+    meta: { requiresAuth: true }
   },
   {
     path: '/login',
@@ -42,13 +45,22 @@ const routes = [
   {
     path: '/orders',
     name: 'orders',
-    component: OrdersView
+    component: OrdersView,
+    meta: { requiresAuth: true }
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAuth && !store.getters.isUserLoggedIn) {
+    next('/login')
+  } else {
+    next()
+  }
 })
 
 export default router
