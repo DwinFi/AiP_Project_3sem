@@ -34,7 +34,7 @@
         <v-row>
           <v-col cols="12">
             <img
-              src="https://cdn.vuetifyjs.com/images/cards/cooking.png"
+              src="https://motoprokat.by/wp-content/uploads/2019/06/motorcycles-wallpapers-2560x1600-0006.jpg"
               height="150"
               class="mt-3"
               alt="preview"
@@ -92,7 +92,7 @@ export default {
           title: this.title,
           desc: this.description,
           promo: this.promo,
-          src: 'https://cdn.vuetifyjs.com/images/cards/cooking.png'
+          src: 'https://motoprokat.by/wp-content/uploads/2019/06/motorcycles-wallpapers-2560x1600-0006.jpg'
         }
 
         await this.$store.dispatch('createAd', ad)

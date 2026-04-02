@@ -39,6 +39,13 @@ export default {
   mutations: {
     createAd(state, payload) {
       state.ads.push(payload)
+    },
+    updateAd(state, payload) {
+      const ad = state.ads.find(item => item.id === payload.id)
+      if (ad) {
+        ad.title = payload.title
+        ad.desc = payload.desc
+      }
     }
   },
 
@@ -58,6 +65,19 @@ export default {
           commit('createAd', newAd)
           commit('setLoading', false)
           resolve(newAd)
+        }, 1000)
+      })
+    },
+
+    updateAd({ commit }, payload) {
+      commit('clearError')
+      commit('setLoading', true)
+
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          commit('updateAd', payload)
+          commit('setLoading', false)
+          resolve()
         }, 1000)
       })
     }
