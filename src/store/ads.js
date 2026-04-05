@@ -33,9 +33,7 @@ export default {
         userId: 'another-user',
         src: 'https://pitbike-cross.ru/upload/iblock/feb/febde0869652626218a867db45b0880b.jpg'
       }
-    ],
-
-    orders: [] // 👈 НОВОЕ
+    ]
   },
 
   mutations: {
@@ -48,9 +46,6 @@ export default {
         ad.title = payload.title
         ad.desc = payload.desc
       }
-    },
-    createOrder(state, payload) {
-      state.orders.push(payload)
     }
   },
 
@@ -85,26 +80,6 @@ export default {
           resolve()
         }, 1000)
       })
-    },
-
-    // 👇 НОВОЕ
-    createOrder({ commit }, payload) {
-      commit('clearError')
-      commit('setLoading', true)
-
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const order = {
-            ...payload,
-            id: Math.random().toString(),
-            done: false
-          }
-
-          commit('createOrder', order)
-          commit('setLoading', false)
-          resolve(order)
-        }, 1000)
-      })
     }
   },
 
@@ -118,17 +93,17 @@ export default {
     },
 
     myAds(state, getters) {
-      if (!getters.user) return []
+      if (!getters.user) {
+        return []
+      }
+
       return state.ads.filter(ad => ad.userId === getters.user.id)
     },
 
     adById(state) {
-      return id => state.ads.find(ad => ad.id == id)
-    },
-
-    // 👇 НОВОЕ
-    orders(state) {
-      return state.orders
+      return id => {
+        return state.ads.find(ad => ad.id == id)
+      }
     }
   }
 }

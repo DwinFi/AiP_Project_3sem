@@ -2,10 +2,17 @@
   <v-container>
     <v-row justify="center">
       <v-col cols="12" sm="8" lg="6">
-
         <h1 class="text-h5 mb-4">Orders</h1>
 
-        <v-list>
+        <v-alert
+          v-if="orders.length === 0"
+          type="info"
+          class="mb-4"
+        >
+          No orders yet.
+        </v-alert>
+
+        <v-list v-else>
           <v-list-item
             v-for="order in orders"
             :key="order.id"
@@ -25,13 +32,15 @@
             </v-list-item-subtitle>
 
             <template #append>
-              <v-btn :to="'/ad/' + order.adId">
+              <v-btn
+                color="primary"
+                :to="'/ad/' + order.adId"
+              >
                 Open
               </v-btn>
             </template>
           </v-list-item>
         </v-list>
-
       </v-col>
     </v-row>
   </v-container>
