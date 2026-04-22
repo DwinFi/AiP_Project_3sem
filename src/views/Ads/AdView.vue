@@ -20,12 +20,12 @@
             <v-btn
               color="orange"
               v-if="canEdit"
-              @click="dialog = true"
+              @click="dialogEdit = true"
             >
               Edit
             </v-btn>
 
-            <v-btn color="green" @click="buyDialog = true">
+            <v-btn color="green" @click="dialogBuy = true">
               Buy
             </v-btn>
           </v-card-actions>
@@ -37,8 +37,7 @@
       </v-col>
     </v-row>
 
-    <!-- EDIT DIALOG -->
-    <v-dialog v-model="dialog" width="500">
+    <v-dialog v-model="dialogEdit" width="500">
       <v-card>
         <v-card-title class="text-h6">
           Edit motorcycle
@@ -59,7 +58,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
 
-          <v-btn variant="text" @click="dialog = false">
+          <v-btn variant="text" @click="dialogEdit = false">
             Cancel
           </v-btn>
 
@@ -75,8 +74,7 @@
       </v-card>
     </v-dialog>
 
-    <!-- BUY DIALOG -->
-    <v-dialog v-model="buyDialog" width="500">
+    <v-dialog v-model="dialogBuy" width="500">
       <v-card>
         <v-card-title class="text-h6">
           Buy motorcycle
@@ -97,7 +95,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
 
-          <v-btn variant="text" @click="buyDialog = false">
+          <v-btn variant="text" @click="dialogBuy = false">
             Cancel
           </v-btn>
 
@@ -112,38 +110,44 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-snackbar
+      v-model="snackbar"
+      color="error"
+      timeout="3000"
+    >
+      {{ errorMessage }}
+    </v-snackbar>
   </v-container>
 </template>
 
 <script>
+import api from '@/api'
+
 export default {
   props: ['id'],
   data() {
     return {
-      dialog: false,
-      buyDialog: false,
+      ad: null,
+      loading: false,
+      snackbar: false,
+      errorMessage: '',
+      dialogEdit: false,
+      dialogBuy: false,
       editedTitle: '',
       editedDesc: '',
       name: '',
-      phone: ''
+      phone: '',
+      currentUser: null
     }
   },
   computed: {
-    ad() {
-      return this.$store.getters.adById(this.id)
-    },
-    loading() {
-      return this.$store.getters.loading
-    },
-    user() {
-      return this.$store.getters.user
-    },
     canEdit() {
-      return this.user && this.ad && this.user.id === this.ad.userId
+      return this.currentUser && this.ad && this.currentUser.id === this.ad.userId
     }
   },
   watch: {
-    dialog(value) {
+    dialogEdit(value) {
       if (value && this.ad) {
         this.editedTitle = this.ad.title
         this.editedDesc = this.ad.desc
@@ -151,26 +155,56 @@ export default {
     }
   },
   methods: {
+    async loadAd() {
+      try {
+        this.ad = await api.getAd(this.id)
+      } catch (error) {
+        this.errorMessage = error.message
+        this.snackbar = true
+      }
+    },
     async saveChanges() {
-      await this.$store.dispatch('updateAd', {
-        id: this.ad.id,
-        title: this.editedTitle,
-        desc: this.editedDesc
-      })
+      this.loading = true
 
-      this.dialog = false
+      try {
+        this.ad = await api.updateAd(this.id, {
+          title: this.editedTitle,
+          desc: this.editedDesc
+        })
+        this.dialogEdit = false
+      } catch (error) {
+        this.errorMessage = error.message
+        this.snackbar = true
+      } finally {
+        this.loading = false
+      }
     },
     async createOrder() {
-      await this.$store.dispatch('createOrder', {
-        name: this.name,
-        phone: this.phone,
-        adId: this.ad.id
-      })
+      this.loading = true
 
-      this.name = ''
-      this.phone = ''
-      this.buyDialog = false
+      try {
+        await api.createOrder({
+          name: this.name,
+          phone: this.phone,
+          adId: this.id
+        })
+
+        this.name = ''
+        this.phone = ''
+        this.dialogBuy = false
+        this.$router.push('/orders')
+      } catch (error) {
+        this.errorMessage = error.message
+        this.snackbar = true
+      } finally {
+        this.loading = false
+      }
     }
+  },
+  mounted() {
+    const user = localStorage.getItem('user')
+    this.currentUser = user ? JSON.parse(user) : null
+    this.loadAd()
   }
 }
 </script>

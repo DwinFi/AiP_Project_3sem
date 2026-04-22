@@ -35,8 +35,8 @@
         </v-list-item>
 
         <v-list-item
-          v-if="isUserLoggedIn"
-          @click="onLogout"
+          v-if="isLoggedIn"
+          @click="logout"
           link
         >
           <template #prepend>
@@ -70,9 +70,9 @@
         </v-btn>
 
         <v-btn
-          v-if="isUserLoggedIn"
+          v-if="isLoggedIn"
           variant="text"
-          @click="onLogout"
+          @click="logout"
         >
           <v-icon start icon="mdi-logout"></v-icon>
           Logout
@@ -90,15 +90,13 @@
 export default {
   data() {
     return {
-      drawer: false
+      drawer: false,
+      isLoggedIn: !!localStorage.getItem('token')
     }
   },
   computed: {
-    isUserLoggedIn() {
-      return this.$store.getters.isUserLoggedIn
-    },
     links() {
-      if (this.isUserLoggedIn) {
+      if (this.isLoggedIn) {
         return [
           { title: 'Orders', icon: 'mdi-bookmark-multiple-outline', url: '/orders' },
           { title: 'Add Motorcycle', icon: 'mdi-motorbike', url: '/new' },
@@ -113,10 +111,22 @@ export default {
     }
   },
   methods: {
-    onLogout() {
-      this.$store.dispatch('logoutUser')
+    logout() {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      this.isLoggedIn = false
+      window.dispatchEvent(new Event('auth-changed'))
       this.$router.push('/login')
+    },
+    syncAuth() {
+      this.isLoggedIn = !!localStorage.getItem('token')
     }
+  },
+  mounted() {
+    window.addEventListener('auth-changed', this.syncAuth)
+  },
+  beforeUnmount() {
+    window.removeEventListener('auth-changed', this.syncAuth)
   }
 }
 </script>

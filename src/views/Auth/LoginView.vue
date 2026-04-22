@@ -11,7 +11,6 @@
             <v-form v-model="valid" ref="form" validate-on="input">
               <v-text-field
                 prepend-icon="mdi-account"
-                name="email"
                 label="Email"
                 type="email"
                 v-model="email"
@@ -20,7 +19,6 @@
 
               <v-text-field
                 prepend-icon="mdi-lock"
-                name="password"
                 label="Password"
                 type="password"
                 v-model="password"
@@ -43,12 +41,11 @@
         </v-card>
 
         <v-snackbar
-          :model-value="!!error"
+          v-model="snackbar"
           color="error"
           timeout="3000"
-          @update:modelValue="closeError"
         >
-          {{ error }}
+          {{ errorMessage }}
         </v-snackbar>
       </v-col>
     </v-row>
@@ -56,12 +53,17 @@
 </template>
 
 <script>
+import api from '@/api'
+
 export default {
   data() {
     return {
       email: '',
       password: '',
       valid: false,
+      loading: false,
+      snackbar: false,
+      errorMessage: '',
       emailRules: [
         v => !!v || 'E-mail is required',
         v => /.+@.+\..+/.test(v) || 'E-mail must be valid'
@@ -72,40 +74,26 @@ export default {
       ]
     }
   },
-  computed: {
-    loading() {
-      return this.$store.getters.loading
-    },
-    error() {
-      return this.$store.getters.error
-    }
-  },
   methods: {
     async onSubmit() {
       const result = await this.$refs.form.validate()
+      if (!result.valid) return
 
-      if (result.valid) {
-        const user = {
-          email: this.email,
-          password: this.password
-        }
+      this.loading = true
 
-        try {
-          await this.$store.dispatch('loginUser', user)
+      try {
+        const data = await api.login(this.email, this.password)
 
-          this.email = ''
-          this.password = ''
-          this.$refs.form.resetValidation()
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        window.dispatchEvent(new Event('auth-changed'))
 
-          this.$router.push('/')
-        } catch (e) {
-          // Ошибка уже положена в store, snackbar покажется сам
-        }
-      }
-    },
-    closeError(value) {
-      if (!value) {
-        this.$store.dispatch('clearError')
+        this.$router.push('/')
+      } catch (error) {
+        this.errorMessage = error.message
+        this.snackbar = true
+      } finally {
+        this.loading = false
       }
     }
   }

@@ -5,7 +5,7 @@
         <h1 class="text-h5 mb-4 mt-4">My Motorcycles</h1>
 
         <v-alert
-          v-if="myAds.length === 0"
+          v-if="ads.length === 0"
           type="info"
           class="mb-4"
         >
@@ -13,8 +13,8 @@
         </v-alert>
 
         <v-card
-          v-for="moto in myAds"
-          :key="moto.id"
+          v-for="moto in ads"
+          :key="moto._id"
           class="mb-4"
         >
           <v-row>
@@ -38,7 +38,7 @@
                 <v-btn
                   color="primary"
                   variant="text"
-                  :to="'/ad/' + moto.id"
+                  :to="'/ad/' + moto._id"
                 >
                   Open
                 </v-btn>
@@ -46,16 +46,36 @@
             </v-col>
           </v-row>
         </v-card>
+
+        <v-snackbar
+          v-model="snackbar"
+          color="error"
+          timeout="3000"
+        >
+          {{ errorMessage }}
+        </v-snackbar>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
+import api from '@/api'
+
 export default {
-  computed: {
-    myAds() {
-      return this.$store.getters.myAds
+  data() {
+    return {
+      ads: [],
+      snackbar: false,
+      errorMessage: ''
+    }
+  },
+  async mounted() {
+    try {
+      this.ads = await api.getMyAds()
+    } catch (error) {
+      this.errorMessage = error.message
+      this.snackbar = true
     }
   }
 }

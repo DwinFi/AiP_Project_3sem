@@ -6,7 +6,6 @@ import NewAdView from '../views/Ads/NewAdView.vue'
 import LoginView from '../views/Auth/LoginView.vue'
 import RegistrationView from '../views/Auth/RegistrationView.vue'
 import OrdersView from '../views/User/OrdersView.vue'
-import store from '../store'
 
 const routes = [
   {
@@ -39,7 +38,7 @@ const routes = [
   },
   {
     path: '/registration',
-    name: 'reg',
+    name: 'registration',
     component: RegistrationView
   },
   {
@@ -56,7 +55,9 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !store.getters.isUserLoggedIn) {
+  const token = localStorage.getItem('token')
+
+  if (to.meta.requiresAuth && !token) {
     next('/login')
   } else {
     next()

@@ -11,7 +11,6 @@
             <v-form v-model="valid" ref="form" validate-on="lazy">
               <v-text-field
                 prepend-icon="mdi-account"
-                name="email"
                 label="Email"
                 type="email"
                 v-model="email"
@@ -20,7 +19,6 @@
 
               <v-text-field
                 prepend-icon="mdi-lock"
-                name="password"
                 label="Password"
                 type="password"
                 v-model="password"
@@ -29,7 +27,6 @@
 
               <v-text-field
                 prepend-icon="mdi-lock"
-                name="confirm-password"
                 label="Confirm Password"
                 type="password"
                 v-model="confirmPassword"
@@ -50,12 +47,22 @@
             </v-btn>
           </v-card-actions>
         </v-card>
+
+        <v-snackbar
+          v-model="snackbar"
+          color="error"
+          timeout="3000"
+        >
+          {{ errorMessage }}
+        </v-snackbar>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
+import api from '@/api'
+
 export default {
   data() {
     return {
@@ -63,6 +70,9 @@ export default {
       password: '',
       confirmPassword: '',
       valid: false,
+      loading: false,
+      snackbar: false,
+      errorMessage: '',
       emailRules: [
         v => !!v || 'E-mail is required',
         v => /.+@.+\..+/.test(v) || 'E-mail must be valid'
@@ -74,9 +84,6 @@ export default {
     }
   },
   computed: {
-    loading() {
-      return this.$store.getters.loading
-    },
     confirmPasswordRules() {
       return [
         v => !!v || 'Confirm password is required',
@@ -87,21 +94,23 @@ export default {
   methods: {
     async onSubmit() {
       const result = await this.$refs.form.validate()
+      if (!result.valid) return
 
-      if (result.valid) {
-        const user = {
-          email: this.email,
-          password: this.password
-        }
+      this.loading = true
 
-        await this.$store.dispatch('registerUser', user)
+      try {
+        const data = await api.register(this.email, this.password)
 
-        this.email = ''
-        this.password = ''
-        this.confirmPassword = ''
-        this.$refs.form.resetValidation()
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        window.dispatchEvent(new Event('auth-changed'))
 
         this.$router.push('/')
+      } catch (error) {
+        this.errorMessage = error.message
+        this.snackbar = true
+      } finally {
+        this.loading = false
       }
     }
   }
